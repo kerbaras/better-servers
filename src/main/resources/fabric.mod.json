@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "better-servers",
+  "version": "${version}",
+  "name": "Better Servers",
+  "description": "Better server gui",
+  "authors": [
+    "Kerbaras"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/better-servers/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "net.kerbaras.betterservers.client.BetterServersClient"
+    ],
+    "main": [
+      "net.kerbaras.betterservers.BetterServers"
+    ]
+  },
+  "mixins": [
+    "better-servers.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.11.2",
+    "fabric": "*",
+    "minecraft": "1.16.5"
+  }
+}
