@@ -4,6 +4,9 @@
   "package": "net.kerbaras.betterservers.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "MinecraftClientMixin",
+    "MultiplayerScreenAccessor",
+    "WindowMixin"
   ],
   "client": [
   ],

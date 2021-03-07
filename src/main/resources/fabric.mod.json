@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "better-servers",
+  "id": "betterservers",
   "version": "${version}",
   "name": "Better Servers",
   "description": "Better server gui",
@@ -10,7 +10,7 @@
   ],
   "contact": {},
   "license": "MIT",
-  "icon": "assets/better-servers/icon.png",
+  "icon": "assets/betterservers/icon.png",
   "environment": "client",
   "entrypoints": {
     "main": [
@@ -18,10 +18,10 @@
     ]
   },
   "mixins": [
-    "better-servers.mixins.json"
+    "betterservers.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.11.2",
-    "minecraft": "1.16.4-1.16.5"
+    "minecraft": "1.16.x"
   }
 }
