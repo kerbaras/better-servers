@@ -15,8 +15,9 @@ public class IconButtonWidget extends AbstractPressableButtonWidget {
 
     private static final Text MESSAGE = new LiteralText("");
     private final Identifier icon;
-    private final Text tooltip;
     private final Runnable onPress;
+    private final Text tooltip;
+    private int padding = 0;
 
     public IconButtonWidget(int x, int y, int width, int height, Identifier icon, Text tooltip, Runnable onPress) {
         super(x, y, width, height, MESSAGE);
@@ -35,11 +36,11 @@ public class IconButtonWidget extends AbstractPressableButtonWidget {
         RenderSystem.defaultBlendFunc();
         RenderSystem.enableDepthTest();
         drawTexture(matrices, x, y, width / 2, height, 0, 46 + imageY * 20, width / 2, 20, 256, 256);
-        drawTexture(matrices, x + width / 2, y, width / 2, height, width / 2f, 46 + imageY * 20, width / 2, 20, 256, 256);
+        drawTexture(matrices, x + width / 2, y, width / 2, height, 200 - width / 2f, 46 + imageY * 20, width / 2, 20, 256, 256);
 
         mc.getTextureManager().bindTexture(icon);
         RenderSystem.enableDepthTest();
-        drawTexture(matrices, x, y, width, height, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
+        drawTexture(matrices, x + padding , y + padding, width - 2 * padding, height - 2 * padding, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
 
         if (isHovered()) {
             Screen currentScreen = mc.currentScreen;
@@ -52,5 +53,10 @@ public class IconButtonWidget extends AbstractPressableButtonWidget {
     @Override
     public void onPress() {
         onPress.run();
+    }
+
+    public IconButtonWidget padding(int padding){
+        this.padding = padding;
+        return this;
     }
 }
