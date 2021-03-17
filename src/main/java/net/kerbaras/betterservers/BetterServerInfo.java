@@ -1,28 +1,36 @@
 package net.kerbaras.betterservers;
 
 import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraft.client.network.ServerInfo;
 import org.jetbrains.annotations.Nullable;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 public class BetterServerInfo {
-    public final String name;
-    public final String ip;
+    private String ip;
+    private String name;
     private ServerInfo.ResourcePackState resourcePackState;
     private String icon;
-    private JSONArray categories;
+    private List<String> categories = new ArrayList<>();
 
     public static BetterServerInfo fromVanilla(ServerInfo serverInfo) {
-        BetterServerInfo info = new BetterServerInfo(serverInfo.name, serverInfo.address);
-        info.setIcon(serverInfo.getIcon());
-        info.setResourcePackState(serverInfo.getResourcePack());
+        BetterServerInfo info = new BetterServerInfo();
+        info.copyFromVanilla(serverInfo);
         return info;
     }
 
-    public BetterServerInfo(String name, String ip){
+    private BetterServerInfo() {}
+
+    public BetterServerInfo(String name, String ip) {
         this.name = name;
         this.ip = ip;
+    }
+
+    public void copyFromVanilla(ServerInfo serverInfo) {
+        this.ip = serverInfo.address;
+        this.name = serverInfo.name;
+        this.resourcePackState = serverInfo.getResourcePack();
+        this.icon = serverInfo.getIcon();
     }
 
     public ServerInfo toVanilla() {
@@ -37,6 +45,21 @@ public class BetterServerInfo {
         return resourcePackState;
     }
 
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     @Nullable
     public String getIcon() {
@@ -45,13 +68,6 @@ public class BetterServerInfo {
 
     public void setIcon(@Nullable String string) {
         this.icon = string;
-    }
-
-    public void applyMetadata(JSONObject metadata) {
-        if (metadata == null)
-            return;
-        // TODO: Handle metadata
-        this.categories = (JSONArray) metadata.getOrDefault("categories", new JSONArray());
     }
 
     public ArrayList<String> getCategories() {
