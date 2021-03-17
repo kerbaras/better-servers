@@ -5,6 +5,7 @@ import net.kerbaras.betterservers.gui.IWindow;
 import net.kerbaras.betterservers.gui.widgets.IconButtonWidget;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.options.ServerList;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
@@ -27,6 +28,7 @@ public class BetterMultiplayerScreen extends Screen {
         super(new TranslatableText("multiplayer.title"));
         this.parent = parent;
         this.serverList = new BetterServerList(client);
+        this.serverList.load();
     }
 
     @Override
@@ -49,6 +51,8 @@ public class BetterMultiplayerScreen extends Screen {
             ((IWindow) (Object) client.getWindow()).betterservers_setForcedScale(1);
             client.onResolutionChanged();
         }
+
+
         this.addIconButton(0,0, CLOSE_ICON, "gui.cancel", () -> client.openScreen(parent)).padding(2);
         this.addIconButton(1,0, LIST_ICON, "betterservers.gui.list", () -> {}).padding(2);
         this.addIconButton(2,0, GRID_ICON, "betterservers.gui.grid", () -> {}).padding(0);
