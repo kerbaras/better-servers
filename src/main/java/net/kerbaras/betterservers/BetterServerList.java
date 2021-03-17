@@ -1,6 +1,7 @@
 package net.kerbaras.betterservers;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import net.fabricmc.loader.api.FabricLoader;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 
 public class BetterServerList {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     private final MinecraftClient mc;
     private final List<BetterServerInfo> servers = new ArrayList<>();
@@ -55,16 +56,22 @@ public class BetterServerList {
         // load our format
 
         // check that our format matches vanilla, if it doesn't match try to merge the vanilla format into our format
-        // TODO: this will change
-        try (Reader reader = Files.newBufferedReader(getBetterServersFile())) {
-            servers.addAll(GSON.fromJson(reader, new TypeToken<ArrayList<BetterServerInfo>>(){}.getType()));
-        } catch (IOException | JsonSyntaxException e) {
-            LOGGER.error("Failed to read better servers file", e);
-            // continue in this method to recreate better servers from vanilla
+
+
+        Path betterServersFile = getBetterServersFile();
+        if (Files.exists(betterServersFile)) {
+            try (Reader reader = Files.newBufferedReader(betterServersFile)) {
+                servers.addAll(GSON.fromJson(reader, new TypeToken<ArrayList<BetterServerInfo>>(){}.getType()));
+            } catch (IOException | JsonSyntaxException e) {
+                LOGGER.error("Failed to read better servers file", e);
+                // continue in this method to recreate better servers from vanilla
+            }
         }
 
         Map<String, List<BetterServerInfo>> betterServerListByIp = servers.stream().collect(Collectors.groupingBy(BetterServerInfo::getIp));
         Map<String, List<BetterServerInfo>> betterServerListByName = servers.stream().collect(Collectors.groupingBy(BetterServerInfo::getName));
+
+        // TODO: add some logging
 
         vanillaServerListByIp.forEach((address, infos) -> {
             List<BetterServerInfo> betterInfos = betterServerListByIp.get(address);
@@ -103,8 +110,13 @@ public class BetterServerList {
         vanillaServerList.saveFile();
 
         // save our format
-        try (Writer writer = Files.newBufferedWriter(getBetterServersFile())) {
-            GSON.toJson(servers, writer);
+        Path betterServersFile = getBetterServersFile();
+        try {
+            Files.createDirectories(betterServersFile.getParent());
+            try (Writer writer = Files.newBufferedWriter(betterServersFile)) {
+                GSON.toJson(servers, writer);
+                writer.flush();
+            }
         } catch (IOException e) {
             LOGGER.error("Failed to write better servers file", e);
         }
