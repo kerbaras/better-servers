@@ -5,12 +5,15 @@ import net.kerbaras.betterservers.gui.IWindow;
 import net.kerbaras.betterservers.gui.widgets.IconButtonWidget;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.options.ServerList;
+import net.minecraft.client.util.Monitor;
+import net.minecraft.client.util.VideoMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 
 public class BetterMultiplayerScreen extends Screen {
+    private static final double SCALE_FOR_1080P = 1.5;
+
     private static final Identifier CLOSE_ICON = new Identifier("betterservers", "icons/close.png");
     private static final Identifier GRID_ICON = new Identifier("betterservers", "icons/appstore.png");
     private static final Identifier LIST_ICON = new Identifier("betterservers", "icons/bars.png");
@@ -20,6 +23,7 @@ public class BetterMultiplayerScreen extends Screen {
     private static final Identifier DELETE_ICON = new Identifier("betterservers", "icons/minus.png");
 
     private boolean initialized = false;
+    private boolean hasRescaled = false;
     private final Screen parent;
     private BetterServerList serverList;
     private TextFieldWidget search;
@@ -46,11 +50,26 @@ public class BetterMultiplayerScreen extends Screen {
         super.init();
         assert client != null;
 
+        // Set custom window scale for this GUI
+        if (!hasRescaled) {
+            double forcedScale;
+            Monitor monitor = client.getWindow().getMonitor();
+            if (monitor == null) {
+                forcedScale = IWindow.UNFORCED_SCALE;
+            } else {
+                VideoMode videoMode = monitor.getCurrentVideoMode();
+                double ratioFromExpected = (videoMode.getWidth() / 1280.0 + videoMode.getHeight() / 720.0) * 0.5;
+                forcedScale = SCALE_FOR_1080P * ratioFromExpected;
+            }
+            //noinspection ConstantConditions
+            ((IWindow) (Object) client.getWindow()).betterservers_setForcedScale(forcedScale);
+            hasRescaled = true; // Prevents infinite recursion
+            client.onResolutionChanged();
+            hasRescaled = false;
+        }
+
         if (!initialized) {
             initialized = true;
-            //noinspection ConstantConditions
-            ((IWindow) (Object) client.getWindow()).betterservers_setForcedScale(1);
-            client.onResolutionChanged();
 
             serverList = new BetterServerList(client);
             serverList.load();
