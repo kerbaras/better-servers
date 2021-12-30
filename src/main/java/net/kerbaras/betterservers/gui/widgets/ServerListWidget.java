@@ -1,33 +1,32 @@
 package net.kerbaras.betterservers.gui.widgets;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.kerbaras.betterservers.gui.screen.BetterMultiplayerScreen;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
-import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.network.chat.Component;
 
-public class ServerListWidget extends AlwaysSelectedEntryListWidget<ServerListWidget.Entry> {
-
+public class ServerListWidget extends ObjectSelectionList<ServerListWidget.Entry> {
 
     private final BetterMultiplayerScreen screen;
 
-    public ServerListWidget(BetterMultiplayerScreen screen, MinecraftClient client, int width, int height, int top, int bottom, int entryHeight) {
+    public ServerListWidget(BetterMultiplayerScreen screen, Minecraft client, int width, int height, int top, int bottom, int entryHeight) {
         super(client, width, height, top, bottom, entryHeight);
         this.screen = screen;
     }
 
     private void updateEntries() {
-        this.clearEntries();
-        this.servers.forEach(this::addEntry);
-        this.addEntry(this.scanningEntry);
-        this.lanServers.forEach(this::addEntry);
+//        this.clearEntries();
+//        this.servers.forEach(this::addEntry);
+//        this.addEntry(this.scanningEntry);
+//        this.lanServers.forEach(this::addEntry);
     }
 
 
-    public class Entry extends AlwaysSelectedEntryListWidget.Entry<Entry> {
+    public class Entry extends ObjectSelectionList.Entry<Entry> {
 
         @Override
-        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+        public void render(PoseStack stack, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
 
         }
 
@@ -69,6 +68,11 @@ public class ServerListWidget extends AlwaysSelectedEntryListWidget<ServerListWi
         @Override
         public boolean charTyped(char chr, int modifiers) {
             return false;
+        }
+
+        @Override
+        public Component getNarration() {
+            return null;
         }
     }
 }

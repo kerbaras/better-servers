@@ -1,10 +1,10 @@
 plugins {
-    id 'fabric-loom' version '0.6.50'
+    id 'fabric-loom' version '0.10.65'
     id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version
@@ -13,12 +13,12 @@ group = project.maven_group
 dependencies {
     //to change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    modCompileOnly "net.fabricmc.fabric-api:fabric-resource-loader-v0:${project.resource_loader_version}"
-    modRuntime "net.fabricmc.fabric-api:fabric-resource-loader-v0:${project.resource_loader_version}"
-    include "net.fabricmc.fabric-api:fabric-resource-loader-v0:${project.resource_loader_version}"
+    modCompileOnly fabricApi.module('fabric-resource-loader-v0', project.fabric_api_version)
+    modRuntimeOnly fabricApi.module('fabric-resource-loader-v0', project.fabric_api_version)
+    include fabricApi.module('fabric-resource-loader-v0', project.fabric_api_version)
 }
 
 processResources {
@@ -32,6 +32,8 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude "fabric.mod.json"
     }
+
+    duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
 // ensure that the encoding is set to UTF-8, no matter what the system default is
