@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.ServerList;
@@ -26,20 +27,25 @@ public class BetterServerList {
     private final Minecraft mc;
     private final List<BetterServerData> servers = new ArrayList<>();
     private final HashMap<String, Set<BetterServerData>> categories = new HashMap<>();
-
+    private final Set<BetterServerData> uncategorized = new HashSet<>();
 
     public BetterServerList(Minecraft mc) {
         this.mc = mc;
     }
 
+    private static Path getBetterServersDir() {
+        return FabricLoader.getInstance().getConfigDir().resolve("better_servers");
+    }
+
     private static Path getBetterServersFile() {
-        return FabricLoader.getInstance().getConfigDir().resolve("better_servers").resolve("servers.json");
+        return getBetterServersDir().resolve("servers.json");
     }
 
     public void load() {
         ServerList vanillaServerListObj = new ServerList(mc);
         servers.clear();
         categories.clear();
+        uncategorized.clear();
 
         // load vanilla
         vanillaServerListObj.load();
@@ -50,7 +56,6 @@ public class BetterServerList {
         }
 
         Map<String, List<ServerData>> vanillaServerListByIp = vanillaServerList.stream().collect(Collectors.groupingBy(info -> info.ip));
-        Map<String, List<ServerData>> vanillaServerListByName = vanillaServerList.stream().collect(Collectors.groupingBy(info -> info.name));
 
 
         // load our format
@@ -93,8 +98,12 @@ public class BetterServerList {
         });
 
         for (BetterServerData server : servers) {
-            for (String ctgy : server.getCategories()) {
-                getOrCreateCategory(ctgy).add(server);
+            if (server.getCategories().isEmpty()) {
+                uncategorized.add(server);
+            } else {
+                for (String ctgy : server.getCategories()) {
+                    getOrCreateCategory(ctgy).add(server);
+                }
             }
         }
     }
@@ -110,21 +119,90 @@ public class BetterServerList {
         vanillaServerList.save();
 
         // save our format
-        Path betterServersFile = getBetterServersFile();
+        Path betterServersDir = getBetterServersDir();
         try {
-            Files.createDirectories(betterServersFile.getParent());
-            try (Writer writer = Files.newBufferedWriter(betterServersFile)) {
+            Files.createDirectories(betterServersDir);
+            Path tempFile = Files.createTempFile(betterServersDir, "better_servers", ".json");
+            try (Writer writer = Files.newBufferedWriter(tempFile)) {
                 GSON.toJson(servers, writer);
                 writer.flush();
             }
+            Util.safeReplaceFile(getBetterServersFile(), tempFile, getBetterServersDir().resolve("better_servers.json_old"));
         } catch (IOException e) {
             LOGGER.error("Failed to write better servers file", e);
         }
     }
 
-    public Set<BetterServerData> getOrCreateCategory(String name) {
+    private Set<BetterServerData> getOrCreateCategory(String name) {
         if (!this.categories.containsKey(name))
             this.categories.put(name, new HashSet<>());
         return this.categories.get(name);
+    }
+
+    public Set<BetterServerData> getUncategorized() {
+        return Collections.unmodifiableSet(this.uncategorized);
+    }
+
+    public void addServerToCategory(BetterServerData data, String category) {
+        var categoryObj = getOrCreateCategory(category);
+        if (!categoryObj.contains(data)) {
+            categoryObj.add(data);
+            uncategorized.remove(data);
+            data.getCategories().add(category);
+        }
+    }
+
+    public void removeServerFromCategory(BetterServerData data, String category) {
+        boolean removed = data.getCategories().remove(category);
+        if (removed) {
+            getOrCreateCategory(category).remove(data);
+            if (data.getCategories().isEmpty()) {
+                uncategorized.add(data);
+            }
+        }
+    }
+
+    public void addCategory(String category) {
+        getOrCreateCategory(category);
+    }
+
+    public void removeCategory(String category) {
+        var categoryObj = categories.get(category);
+        if (categoryObj != null) {
+            while (!categoryObj.isEmpty()) {
+                removeServerFromCategory(categoryObj.iterator().next(), category);
+            }
+            categories.remove(category);
+        }
+    }
+
+    public Set<String> getCategories() {
+        return Collections.unmodifiableSet(categories.keySet());
+    }
+
+    public void addServer(BetterServerData server) {
+        servers.add(server);
+        if (server.getCategories().isEmpty()) {
+            uncategorized.add(server);
+        } else {
+            for (String category : server.getCategories()) {
+                getOrCreateCategory(category).add(server);
+            }
+        }
+    }
+
+    public void removeServer(BetterServerData server) {
+        servers.remove(server);
+        if (server.getCategories().isEmpty()) {
+            uncategorized.remove(server);
+        } else {
+            for (String category : server.getCategories()) {
+                getOrCreateCategory(category).remove(server);
+            }
+        }
+    }
+
+    public List<BetterServerData> getServers() {
+        return Collections.unmodifiableList(servers);
     }
 }

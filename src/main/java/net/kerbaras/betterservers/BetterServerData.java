@@ -34,7 +34,10 @@ public class BetterServerData {
     }
 
     public ServerData toVanilla() {
-        return null;
+        ServerData data = new ServerData(name, ip, false);
+        data.setResourcePackStatus(resourcePackStatus);
+        data.setIconB64(icon);
+        return data;
     }
 
     public void setResourcePackStatus(ServerData.ServerPackStatus resourcePackStatus) {
@@ -70,7 +73,7 @@ public class BetterServerData {
         this.icon = string;
     }
 
-    public ArrayList<String> getCategories() {
-        return (ArrayList<String>) this.categories;
+    public List<String> getCategories() {
+        return this.categories;
     }
 }
