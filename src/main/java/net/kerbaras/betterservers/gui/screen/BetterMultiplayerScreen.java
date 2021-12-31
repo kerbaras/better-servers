@@ -85,7 +85,7 @@ public class BetterMultiplayerScreen extends Screen {
         this.addIconButton(3, 1, ADD_FOLDER_ICON, "selectServer.add", () -> {});
 
         this.search = new EditBox(this.font, 15, 15, this.getSearchWidth(), 24, new TranslatableComponent("selectWorld.search"));
-        this.addWidget(this.search);
+        this.addRenderableWidget(this.search);
         this.setInitialFocus(this.search);
     }
 
@@ -105,13 +105,12 @@ public class BetterMultiplayerScreen extends Screen {
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         renderBackground(matrices);
-        search.render(matrices, mouseX, mouseY, delta);
         super.render(matrices, mouseX, mouseY, delta);
     }
 
     private IconButton addIconButton(int gridX, int gridY, ResourceLocation icon, String tooltipTranslationKey, Runnable onPress) {
         final int SIZE = 24;
-        return addWidget(new IconButton(width - 15 - SIZE - gridX * (SIZE + 8), 15 + gridY * (SIZE + 12), SIZE, SIZE, icon, new TranslatableComponent(tooltipTranslationKey), onPress));
+        return addRenderableWidget(new IconButton(width - 15 - SIZE - gridX * (SIZE + 8), 15 + gridY * (SIZE + 12), SIZE, SIZE, icon, new TranslatableComponent(tooltipTranslationKey), onPress));
     }
 
     private int getSearchWidth() {
