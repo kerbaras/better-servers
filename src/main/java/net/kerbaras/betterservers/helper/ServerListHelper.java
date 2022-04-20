@@ -30,11 +30,17 @@ public class ServerListHelper {
                             // otherwise match by name
                     .or(() -> findHit(betterServerListByName.get(server.name), candidate -> candidate.ip.equals(server.ip)));
 
-            return augmentData(server, betterServer.get());
+            return betterServer
+                    .map(betterServerData -> augmentData(server, betterServerData))
+                    .orElseGet(() -> augmentData(server, null));
+
         }).collect(Collectors.toList());
     }
 
     private static Optional<BetterServerData> findHit(List<BetterServerData> candidates, Predicate<BetterServerData> predicate){
+        // if there's no candidates, then do not merge
+        if (candidates == null) return Optional.empty();
+
         // if there's only 1 option, then use that
         if (candidates.size() == 1) return Optional.of(candidates.get(0));
 

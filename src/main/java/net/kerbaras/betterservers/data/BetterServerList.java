@@ -8,9 +8,9 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.kerbaras.betterservers.helper.ServerListHelper;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Option;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.ServerList;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,8 +20,6 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.logging.Filter;
-import java.util.stream.Collectors;
 
 public class BetterServerList {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -49,8 +47,6 @@ public class BetterServerList {
 
     public void load() {
         ServerList vanillaServerListObj = new ServerList(mc);
-        servers.clear();
-        savedViews.clear();
 
         // load vanilla
         vanillaServerListObj.load();
@@ -61,10 +57,12 @@ public class BetterServerList {
         }
 
         // load our format
+        servers.clear();
         loadFromDisk().ifPresent(candidates ->
                 servers.addAll(ServerListHelper.load(vanillaServerList, candidates)));
 
         // load saved views
+        savedViews.clear();
         loadViewsFromDisk().ifPresent(savedViews::putAll);
     }
 
@@ -96,32 +94,35 @@ public class BetterServerList {
 
     public void save() {
         ServerList vanillaServerList = new ServerList(mc);
+
         // copy our data to vanilla
         for (BetterServerData server : servers) {
             vanillaServerList.add(server.toVanilla());
         }
+        LOGGER.info("==> [BETTER SERVER] <== vanillaServerList: " + vanillaServerList.size());
 
         // save vanilla
         vanillaServerList.save();
 
         // save our format
         try {
-            safeSave(servers, "servers");
-            safeSave(savedViews, "saved_views");
+            safeSave(servers, getBetterServersFile());
+            safeSave(savedViews, getSavedViewsFile());
         } catch (IOException e){
             LOGGER.error("Failed to save data");
         }
     }
 
-    private void safeSave(Object write, String name) throws IOException {
+    private <T> void safeSave(T write, Path file) throws IOException {
         Path betterServersDir = getBetterServersDir();
         Files.createDirectories(betterServersDir);
+        String name = FilenameUtils.getBaseName(file.toString());
         Path tempFile = Files.createTempFile(betterServersDir, name, ".json");
         try (Writer writer = Files.newBufferedWriter(tempFile)) {
             GSON.toJson(write, writer);
             writer.flush();
         }
-        Util.safeReplaceFile(getBetterServersFile(), tempFile, getBetterServersDir().resolve(name.concat(".json_old")));
+        Util.safeReplaceFile(file, tempFile, getBetterServersDir().resolve(name.concat(".json_old")));
     }
 
     public void setSavedView(String name, FilterData data) {
