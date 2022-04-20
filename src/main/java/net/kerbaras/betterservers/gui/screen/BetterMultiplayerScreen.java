@@ -3,7 +3,7 @@ package net.kerbaras.betterservers.gui.screen;
 import com.mojang.blaze3d.platform.Monitor;
 import com.mojang.blaze3d.platform.VideoMode;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.kerbaras.betterservers.BetterServerList;
+import net.kerbaras.betterservers.data.BetterServerList;
 import net.kerbaras.betterservers.gui.IWindow;
 import net.kerbaras.betterservers.gui.widgets.IconButton;
 import net.minecraft.client.gui.components.EditBox;
