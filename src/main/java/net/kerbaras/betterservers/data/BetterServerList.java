@@ -96,10 +96,14 @@ public class BetterServerList {
         ServerList vanillaServerList = new ServerList(mc);
 
         // copy our data to vanilla
+        int size = vanillaServerList.size();
+        int index = 0;
         for (BetterServerData server : servers) {
-            vanillaServerList.add(server.toVanilla());
+            if (index < size)
+                vanillaServerList.replace(index++, server.toVanilla());
+            else
+                vanillaServerList.add(server.toVanilla());
         }
-        LOGGER.info("==> [BETTER SERVER] <== vanillaServerList: " + vanillaServerList.size());
 
         // save vanilla
         vanillaServerList.save();
